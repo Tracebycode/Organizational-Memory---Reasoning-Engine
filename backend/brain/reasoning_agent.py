@@ -1,4 +1,5 @@
 import ollama
+from opentelemetry import context
 
 
 class ReasoningAgent:
@@ -9,22 +10,28 @@ class ReasoningAgent:
     def reason(self, question, context):
 
         prompt = f"""
-Question: {question}
+You are an AI that explains engineering decisions in natural language.
 
 Context:
 {context}
 
-Explain briefly why the decision was made.
+User question:
+{question}
+
+Write a clear natural explanation.
+Do NOT return bullet points.
+Do NOT list fields.
+Explain like a human explaining to a teammate.
 """
 
         try:
             response = ollama.chat(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                options={"num_predict": 80}
-            )
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            options={"num_predict": 120, "temperature": 0.3}
+        )
 
             return response["message"]["content"]
 
-        except Exception as e:
-            return f"Decision reasoning:\n{context}"
+        except:
+            return context
